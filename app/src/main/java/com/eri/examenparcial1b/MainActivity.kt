@@ -5,8 +5,10 @@ import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -21,6 +23,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var xtextViewResultado : TextView
     lateinit var xbuttonCalcular : Button
      var generoSeleccionado : String? = null
+    lateinit var ximageViewNino : ImageView
+    lateinit var ximageViewNina : ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +40,8 @@ class MainActivity : AppCompatActivity() {
         xeditTextMadre = findViewById(R.id.editTextMadre)
         xtextViewResultado = findViewById(R.id.textViewResultado)
         xbuttonCalcular = findViewById(R.id.buttonCalcular)
+        ximageViewNino = findViewById(R.id.imageViewNino)
+        ximageViewNina = findViewById(R.id.imageViewnina)
 
         genero = arrayOf("Niño", "Niña")
         val adaptador = ArrayAdapter(this, android.R.layout.simple_list_item_1, genero)
@@ -44,34 +50,56 @@ class MainActivity : AppCompatActivity() {
             generoSeleccionado = genero[position]
         }
 
+        ximageViewNino.visibility = View.INVISIBLE
+        ximageViewNina.visibility = View.INVISIBLE
 
         xbuttonCalcular.setOnClickListener {
             CalcularTanner()
         }
+
+
     }
 
 
     fun CalcularTanner() {
 
-        if (xeditTextPadre.text.toString().isNotEmpty() && xeditTextMadre.text.toString().isNotEmpty() && generoSeleccionado != null) {
-            val padre = xeditTextPadre.text.toString().toDouble()
-            val madre = xeditTextMadre.text.toString().toDouble()
-            val promedio = (padre + madre)
-            var resultado = 0.0
+        val padreTexto = xeditTextPadre.text.toString()
+        val madreTexto = xeditTextMadre.text.toString()
+        val sel : String
 
+        // Verifica que los campos no estén vacíos y que el género esté seleccionado
+        if (padreTexto.isNotEmpty() && madreTexto.isNotEmpty() && generoSeleccionado != null) {
+            try {
+                val padre = padreTexto.toDouble()
+                val madre = madreTexto.toDouble()
+                val promedio = (padre + madre)
+                var resultado = 0.0
 
-            if (generoSeleccionado == "Niño") {
-                resultado = (promedio + 13) / 2
-            } else {
-                resultado = (promedio - 13) / 2
+                if (generoSeleccionado == "Niño") {
+                    resultado = (promedio + 13) / 2
+                    ximageViewNino.visibility = View.VISIBLE
+                    ximageViewNina.visibility = View.INVISIBLE
+                    sel= "del"
+
+                } else {
+                    resultado = (promedio - 13) / 2
+                    ximageViewNina.visibility = View.VISIBLE
+                    ximageViewNino.visibility = View.INVISIBLE
+                    sel= "dela"
+                }
+
+                xtextViewResultado.text = "El resultado "+ sel + " "+ generoSeleccionado + " es: %.2f".format(resultado) + " CM"
+
+            } catch (e: NumberFormatException) {
+                Toast.makeText(this, "Por favor ingrese valores válidos para las alturas", Toast.LENGTH_SHORT).show()
             }
-
-
-            xtextViewResultado.text = "El resultado es: %.2f".format(resultado)
-
         } else {
-
-            xtextViewResultado.text = "Por favor ingresa todos los datos y selecciona un género"
+            // Verifica si falta algún campo
+            if (padreTexto.isEmpty() || madreTexto.isEmpty()) {
+                Toast.makeText(this, "Por favor ingrese las alturas del padre y la madre", Toast.LENGTH_SHORT).show()
+            } else if (generoSeleccionado == null) {
+                Toast.makeText(this, "Por favor seleccione un género", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
